@@ -1,0 +1,35 @@
+name: Deploy Flutter Web to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main # 或者你的主分支名，比如 master
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest # 使用 GitHub 提供的 Linux runner
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3 # 检出你的代码
+
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2 # 设置 Flutter 环境
+        with:
+          channel: 'stable' # 或者指定版本 '3.16.0' 等
+
+      - name: Install dependencies
+        run: flutter pub get # 安装项目依赖
+
+      - name: Build Flutter web
+        run: flutter build web --release --base-href /${{ github.event.repository.name }}/
+        # 使用 github.event.repository.name 自动获取仓库名
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3 # 使用这个 Action 来部署
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }} # GitHub 自动提供的 token
+          publish_dir: ./build/web # 指定要部署的目录
+          # publish_branch: gh-pages # 默认部署到 gh-pages 分支
+          # user_name: 'github-actions[bot]' # 可选：自定义提交者名字
+          # user_email: 'github-actions[bot]@users.noreply.github.com' # 可选：自定义提交者邮箱
